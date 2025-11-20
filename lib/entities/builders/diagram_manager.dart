@@ -78,7 +78,7 @@ class DiagramManager {
   DiagramData buildDiagram() {
     final allPositions = <String, Offset>{};
     final levelsHeight = <int, double>{};
-    double currentY = kVGap;
+    double currentY = 0;
 
     // Сортируем уровни: 1-9, затем 0
     final sortedLevels = _levelBuilders.keys.toList()
@@ -106,7 +106,7 @@ class DiagramManager {
   }
 
   int getLevelByPosition(Offset position, Map<int, double> levelsHeight) {
-    double currentY = kVGap; // Начальная позиция первого уровня
+    double currentY = 0; // Начальная позиция первого уровня
 
     // Сортируем уровни по порядку: 1, 2, 3, ..., 0
     final sortedLevels = levelsHeight.keys.toList()

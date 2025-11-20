@@ -5,6 +5,7 @@ import 'entities/builders/diagram_manager.dart';
 import 'entities/connection.dart';
 import 'entities/subscriber_node.dart';
 import 'levels_painter.dart';
+import 'connections_painter.dart';
 
 class InteractiveDiagramWidget extends StatefulWidget {
   final List<SubscriberNode> nodes;
@@ -112,6 +113,16 @@ class _InteractiveDiagramWidgetState extends State<InteractiveDiagramWidget> {
                       painter: LevelsPainter(
                         levelsHeight: _diagramData?.levelsHeight ?? {},
                         viewportTransform: _transformationController.value,
+                      ),
+                    ),
+                    CustomPaint(
+                      size: Size(
+                        _diagramWidth,
+                        widget.height,
+                      ),
+                      painter: ConnectionsPainter(
+                        connections: widget.connections,
+                        nodePositions: _diagramData?.nodePositions ?? {},
                       ),
                     ),
                     ...widget.nodes.map((item) {

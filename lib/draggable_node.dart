@@ -41,8 +41,7 @@ class _DraggableNodeState extends State<DraggableNode> {
 
   @override
   Widget build(BuildContext context) {
-    final Offset topLeft =
-        _position - const Offset(kNodeWidth / 2, kNodeHeight / 2);
+    final Offset topLeft = _position;
 
     return Positioned(
       left: topLeft.dx,
