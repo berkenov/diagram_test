@@ -111,6 +111,7 @@ class _InteractiveDiagramWidgetState extends State<InteractiveDiagramWidget> {
                       ),
                       painter: LevelsPainter(
                         levelsHeight: _diagramData?.levelsHeight ?? {},
+                        viewportTransform: _transformationController.value,
                       ),
                     ),
                     ...widget.nodes.map((item) {

@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 class LevelsPainter extends CustomPainter {
   LevelsPainter({
     required this.levelsHeight,
+    required this.viewportTransform,
   });
 
   final Map<int, double> levelsHeight;
+  final Matrix4 viewportTransform;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -14,10 +16,22 @@ class LevelsPainter extends CustomPainter {
     const double extraWidth = 50000.0;
 
     const double extraHeight = 50000.0;
-    final keys = levelsHeight.keys
-        .toList(); // Assumes sorted by DiagramManager logic, but let's be safe?
-    // DiagramManager sorts them. But Map iteration might not guarantee it if modified?
-    // Actually DiagramManager creates a new Map in order.
+    final keys = levelsHeight.keys.toList();
+
+    // Calculate sticky X position
+    // Transform: x_screen = scale * x_world + tx
+    // We want x_screen = 8 (padding)
+    // x_world = (8 - tx) / scale
+    final double scale = viewportTransform.getMaxScaleOnAxis();
+    final double tx = viewportTransform.getTranslation().x;
+    // Ensure text doesn't go off the left side of the diagram content (optional, but good for sanity)
+    // Actually, we want it to stick to the screen edge, even if that's "before" the diagram starts visually.
+    // But since we draw infinite background, it's fine.
+    // We just need to make sure we don't draw it too far right if the user pans way left?
+    // No, if user pans left (tx > 0), the diagram moves right. The left edge of screen is still 0.
+    // So x_world will be negative. That's fine.
+
+    final double stickyX = (8.0 - tx) / scale;
 
     for (int i = 0; i < keys.length; i++) {
       final int level = keys[i];
@@ -55,7 +69,7 @@ class LevelsPainter extends CustomPainter {
       )..layout();
 
       final double textY = top + (height - textPainter.height) / 2;
-      textPainter.paint(canvas, Offset(8, textY));
+      textPainter.paint(canvas, Offset(stickyX, textY));
 
       top += height;
     }
@@ -63,6 +77,7 @@ class LevelsPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant LevelsPainter oldDelegate) {
-    return oldDelegate.levelsHeight.length != levelsHeight.length;
+    return oldDelegate.levelsHeight.length != levelsHeight.length ||
+        oldDelegate.viewportTransform != viewportTransform;
   }
 }
