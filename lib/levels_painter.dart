@@ -10,8 +10,34 @@ class LevelsPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     double top = 0;
-    levelsHeight.forEach((int level, double height) {
-      final Rect rect = Rect.fromLTWH(0, top, size.width, height);
+    // Draw very wide to simulate infinite horizontal space
+    const double extraWidth = 50000.0;
+
+    const double extraHeight = 50000.0;
+    final keys = levelsHeight.keys
+        .toList(); // Assumes sorted by DiagramManager logic, but let's be safe?
+    // DiagramManager sorts them. But Map iteration might not guarantee it if modified?
+    // Actually DiagramManager creates a new Map in order.
+
+    for (int i = 0; i < keys.length; i++) {
+      final int level = keys[i];
+      final double height = levelsHeight[level]!;
+
+      double rectTop = top;
+      double rectBottom = top + height;
+
+      // First level extends up
+      if (i == 0) {
+        rectTop -= extraHeight;
+      }
+
+      // Last level extends down
+      if (i == keys.length - 1) {
+        rectBottom += extraHeight;
+      }
+
+      final Rect rect = Rect.fromLTRB(
+          -extraWidth, rectTop, size.width + extraWidth, rectBottom);
       final Paint paint = Paint()
         ..shader = const LinearGradient(
           begin: Alignment.topCenter,
@@ -19,6 +45,7 @@ class LevelsPainter extends CustomPainter {
           colors: <Color>[Color(0xFF2E2E2E), Color(0xFF222222)],
         ).createShader(rect);
       canvas.drawRect(rect, paint);
+
       final TextPainter textPainter = TextPainter(
         text: TextSpan(
           text: '$level',
@@ -31,7 +58,7 @@ class LevelsPainter extends CustomPainter {
       textPainter.paint(canvas, Offset(8, textY));
 
       top += height;
-    });
+    }
   }
 
   @override

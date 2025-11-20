@@ -27,6 +27,9 @@ abstract interface class ILevelBuilder {
   /// Получение высоты уровня
   double getHeight();
 
+  /// Получение ширины контента уровня
+  double getContentWidth();
+
   /// При изменени верхних левелов, пересчитывать позиции по вертикали
   LevelBuildResult changePositionByY(double delta);
 
@@ -120,6 +123,23 @@ class LevelBuilderImpl implements ILevelBuilder {
     final double levelHeight =
         kNodeHeight * sublayerCount + kVGap * (sublayerCount + 1);
     return levelHeight;
+  }
+
+  @override
+  double getContentWidth() {
+    final hierarchy = getHierarchy();
+    if (hierarchy.isEmpty) return 0;
+
+    int maxNodesInRow = 0;
+    for (final row in hierarchy) {
+      if (row.length > maxNodesInRow) {
+        maxNodesInRow = row.length;
+      }
+    }
+
+    // Width = (nodes * nodeWidth) + ((nodes + 1) * gap)
+    // Assuming gap on both sides
+    return maxNodesInRow * kNodeWidth + (maxNodesInRow + 1) * kHGap;
   }
 
   @override

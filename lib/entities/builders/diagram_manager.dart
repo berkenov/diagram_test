@@ -17,7 +17,7 @@ class DiagramManager {
   final List<Connection> connections;
   final List<SubscriberNode> initialNodes;
   final Map<String, double> initialSavePosition;
-  final double width;
+  double width;
 
   DiagramData? _lastResult;
 
@@ -32,16 +32,47 @@ class DiagramManager {
     }
 
     // Создаём билдеры для каждого уровня
-    for (final entry in nodesByLevel.entries) {
+    // Ensure levels 1-9 and 0 exist, plus any other levels present in nodes
+    final Set<int> allLevels = {
+      ...nodesByLevel.keys,
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+    };
+
+    for (final level in allLevels) {
       final builder = LevelBuilderImpl();
       builder.initialize(
-        level: entry.key,
-        nodes: entry.value,
+        level: level,
+        nodes: nodesByLevel[level] ?? [],
         connections: connections,
         savedPositions: initialSavePosition, // или из кэша
       );
-      _levelBuilders[entry.key] = builder;
+      _levelBuilders[level] = builder;
     }
+  }
+
+  double calculateContentWidth() {
+    double maxWidth = 0;
+    for (final builder in _levelBuilders.values) {
+      final levelWidth = builder.getContentWidth();
+      if (levelWidth > maxWidth) {
+        maxWidth = levelWidth;
+      }
+    }
+    // Add some extra padding (e.g. 2 nodes width as requested)
+    return maxWidth + (kNodeWidth * 2);
+  }
+
+  void updateWidth(double newWidth) {
+    width = newWidth;
   }
 
   DiagramData buildDiagram() {

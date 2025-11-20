@@ -35,6 +35,7 @@ class _InteractiveDiagramWidgetState extends State<InteractiveDiagramWidget> {
   final TransformationController _transformationController =
       TransformationController();
   double _scale = 1.0;
+  double _diagramWidth = 0;
 
   static const double _minScale = 0.3;
   static const double _maxScale = 3.0;
@@ -55,6 +56,17 @@ class _InteractiveDiagramWidgetState extends State<InteractiveDiagramWidget> {
       width: widget.width,
     );
     _diagramManager.initialize();
+
+    // Calculate dynamic width
+    final contentWidth = _diagramManager.calculateContentWidth();
+    _diagramWidth = math.max(widget.width, contentWidth);
+    _diagramManager.updateWidth(_diagramWidth);
+
+    // Calculate initial scale to fit width
+    if (_diagramWidth > widget.width) {
+      _scale = (widget.width / _diagramWidth).clamp(_minScale, _maxScale);
+      _updateTransformation();
+    }
 
     await Future.delayed(Duration(seconds: 2));
     _diagramData = _diagramManager.buildDiagram();
@@ -87,13 +99,14 @@ class _InteractiveDiagramWidgetState extends State<InteractiveDiagramWidget> {
               onInteractionUpdate: _onInteractionUpdate,
               child: Container(
                 // Явно указываем размеры диаграммы
-                width: widget.width,
+                width: _diagramWidth,
                 height: widget.height,
                 child: Stack(
+                  clipBehavior: Clip.none,
                   children: [
                     CustomPaint(
                       size: Size(
-                        widget.width,
+                        _diagramWidth,
                         widget.height,
                       ),
                       painter: LevelsPainter(
